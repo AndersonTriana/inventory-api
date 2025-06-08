@@ -132,7 +132,7 @@ docker compose exec inventory-api php artisan key:generate
 docker compose exec inventory-api php artisan migrate:fresh --seed
 ```
 
-La API estará disponible en `http://inventory-api-anderson.us-east-1.elasticbeanstalk.com/api`
+La API estará disponible en `http://localhost:8000`
 
 ## 🌐 URL Pública
 
