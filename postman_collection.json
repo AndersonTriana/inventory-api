@@ -13,7 +13,7 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:8000/api",
+      "value": "http://inventory-api-anderson.us-east-1.elasticbeanstalk.com/api",
       "type": "string",
       "description": "URL base de la API"
     },
