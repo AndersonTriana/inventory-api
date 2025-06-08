@@ -1,61 +1,378 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Inventory API - Laravel RESTful API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat&logo=laravel)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=flat&logo=php)](https://php.net)
 
-## About Laravel
+Una API RESTful para gestión de inventario construida con Laravel 11, Laravel Sanctum para autenticación y Laravel Policies para autorización basada en roles.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Características
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Autenticación JWT** con Laravel Sanctum
+- **Autorización basada en roles** (Admin/User) usando Laravel Policies
+- **CRUD completo** para Usuarios, Categorías y Productos
+- **Sistema de localización** en español e inglés
+- **Colección de Postman** incluida para pruebas
+- **Seeding automático** con datos de prueba
+- **Configuración simplificada** con `.env.example` listo para usar
+- **Docker Compose** para entorno de desarrollo
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 📚 Índice
 
-## Learning Laravel
+- [Instalación](#-instalación)
+- [URL Pública](#-url-pública)
+- [Cuentas de Prueba](#-cuentas-de-prueba)
+- [Documentación](#-documentación)
+- [Endpoints de la API](#-endpoints-de-la-api)
+- [Autenticación](#-autenticación)
+- [Autorización](#️-autorización)
+- [Comandos Útiles](#-comandos-útiles)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Decisiones de Diseño](#️-decisiones-de-diseño)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🛠 Instalación
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Opción 1: Instalación Manual
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#### Requisitos Previos
 
-## Laravel Sponsors
+- PHP 8.3
+- Composer 2.5+
+- PostgreSQL 17+
+- Node.js (opcional, para assets)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+#### Pasos de Instalación
 
-### Premium Partners
+1. **Clonar el repositorio**
+```bash
+git clone https://github.com/AndersonTriana/inventory-api.git
+cd inventory-api
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+2. **Instalar dependencias PHP**
+```bash
+composer install
+```
 
-## Contributing
+3. **Copiar .env.example**
+```bash
+cp .env.example .env
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. **Generar clave de aplicación**
+```bash
+php artisan key:generate
+```
 
-## Code of Conduct
+5. **Configurar variables de entorno**: Configura las siguientes variables en tu archivo `.env`:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=inventory
+DB_USERNAME=tu_usuario
+DB_PASSWORD=tu_contraseña
+```
 
-## Security Vulnerabilities
+6. **Ejecutar migraciones y seeders**
+```bash
+php artisan migrate:fresh --seed
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+7. **Iniciar servidor de desarrollo**
+```bash
+php artisan serve
+```
 
-## License
+### Opción 2: Docker Compose (Recomendado)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+#### Requisitos Previos
+
+- Docker 24.0+ 
+- Docker Compose 2.20+
+
+#### Pasos de Instalación
+
+1. **Clonar el repositorio**
+```bash
+git clone https://github.com/AndersonTriana/inventory-api.git
+cd inventory-api
+```
+
+2. **Copiar .env.example**
+```bash
+cp .env.example .env
+```
+
+3. **Configurar variables de entorno**: Configura las siguientes variables en tu archivo `.env`:
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=172.19.0.2
+DB_PORT=5432
+DB_DATABASE=inventory
+DB_USERNAME=inventory
+DB_PASSWORD=inventory
+```
+
+
+4. **Levantar servicios**
+```bash
+docker compose up -d
+```
+
+5. **Instalar dependencias**
+```bash
+docker compose exec inventory-api composer install
+```
+
+6. **Configurar aplicación**
+```bash
+docker compose exec inventory-api php artisan key:generate
+docker compose exec inventory-api php artisan migrate:fresh --seed
+```
+
+La API estará disponible en `http://inventory-api-anderson.us-east-1.elasticbeanstalk.com/api`
+
+## 🌐 URL Pública
+
+- **AWS**: `http://inventory-api-anderson.us-east-1.elasticbeanstalk.com/`
+
+## 🎯 Cuentas de Prueba
+
+Después de ejecutar los seeders, tendrás disponibles:
+
+**Administrador:**
+- Email: `admin@example.com`
+- Password: `password`
+- Rol: `admin`
+
+**Usuario Regular:**
+- Email: `user@example.com`
+- Password: `password`
+- Rol: `user`
+
+## 📋 Documentación
+
+### Colección de Postman
+
+**Importar y usar:**
+1. Importa `postman_collection.json` en Postman
+2. Las variables y autenticación están preconfiguradas
+3. Flujo recomendado: Registro → Login Usuario → Login Admin
+
+**Configuración para entorno local:**
+Por defecto, la colección está configurada para usar la URL pública:
+```json
+"base_url": "http://inventory-api-anderson.us-east-1.elasticbeanstalk.com/api"
+```
+
+Para hacer pruebas en tu entorno local, cambia la variable `base_url` a:
+```
+http://localhost:8000/api
+```
+
+**Incluye:**
+- ✅ Variables de entorno preconfiguradas  
+- ✅ Casos de prueba para los dos roles
+
+## 📖 Endpoints de la API
+
+### Autenticación
+
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| POST | `/api/register` | Registrar nuevo usuario | Público |
+| POST | `/api/login` | Iniciar sesión | Público |
+| POST | `/api/logout` | Cerrar sesión | Autenticado |
+
+### Usuarios
+
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/users` | Listar usuarios | Admin |
+| GET | `/api/users/{id}` | Obtener usuario | Admin/Propio |
+| PUT | `/api/users/{id}` | Actualizar usuario | Admin/Propio |
+| DELETE | `/api/users/{id}` | Eliminar usuario | Admin |
+
+### Categorías
+
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/categories` | Listar categorías | Todos |
+| GET | `/api/categories/{id}` | Obtener categoría | Todos |
+| POST | `/api/categories` | Crear categoría | Admin |
+| PUT | `/api/categories/{id}` | Actualizar categoría | Admin |
+| DELETE | `/api/categories/{id}` | Eliminar categoría | Admin |
+
+### Productos
+
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/products` | Listar productos | Todos |
+| GET | `/api/products/{id}` | Obtener producto | Todos |
+| POST | `/api/products` | Crear producto | Admin |
+| PUT | `/api/products/{id}` | Actualizar producto | Admin |
+| DELETE | `/api/products/{id}` | Eliminar producto | Admin |
+
+## 🔐 Autenticación
+
+La API utiliza **Laravel Sanctum** para autenticación basada en tokens.
+
+### Ejemplo de Login
+
+```bash
+curl -X POST http://inventory-api-anderson.us-east-1.elasticbeanstalk.com/api/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@example.com",
+    "password": "password"
+  }'
+```
+
+**Respuesta:**
+```json
+{
+  "success": true,
+  "message": "Usuario autenticado correctamente",
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "Admin User",
+      "email": "admin@example.com",
+      "role": "admin"
+    },
+    "token": "1|abc123..."
+  }
+}
+```
+
+### Uso del Token
+
+```bash
+curl -X GET http://inventory-api-anderson.us-east-1.elasticbeanstalk.com/api/users \
+  -H "Authorization: Bearer 1|abc123..." \
+  -H "Accept: application/json"
+```
+
+## 🛡️ Autorización
+
+El sistema implementa autorización basada en roles usando **Laravel Policies**:
+
+### Roles Disponibles
+
+- **Admin**: Acceso completo (CRUD) a todos los recursos
+- **User**: Solo lectura a categorías y productos
+
+### Políticas de Acceso
+
+**UserPolicy:**
+- Solo admins pueden listar usuarios
+- Usuarios pueden ver/editar su propio perfil
+- Solo admins pueden eliminar usuarios
+
+**CategoryPolicy & ProductPolicy:**
+- Todos pueden leer (índice y mostrar)
+- Solo admins pueden crear, actualizar y eliminar
+
+## 🧪 Comandos Útiles
+
+### Instalación Manual
+```bash
+# Refrescar BD y datos de prueba
+php artisan migrate:fresh --seed
+
+# Ver rutas de la API
+php artisan route:list --path=api
+
+# Limpiar cache
+php artisan cache:clear && php artisan config:clear
+```
+
+### Docker
+```bash
+# Refrescar BD y datos de prueba
+docker compose exec inventory-api php artisan migrate:fresh --seed
+
+# Ver rutas
+docker compose exec inventory-api php artisan route:list --path=api
+
+# Ver logs
+docker compose logs -f inventory-api
+
+# Acceder al contenedor
+docker compose exec inventory-api bash
+
+# Detener servicios
+docker compose down
+
+# Reiniciar servicios
+docker compose restart
+```
+
+## 🏗️ Decisiones de Diseño
+
+### ¿Por qué Laravel Policies en lugar de Middleware?
+
+**Laravel Policies** fue elegido sobre middleware personalizado por las siguientes razones:
+
+1. **Integración Nativa**: Las políticas están profundamente integradas con el sistema de autorización de Laravel
+2. **Granularidad**: Permiten autorización a nivel de modelo, no solo a nivel de ruta
+3. **Testabilidad**: Fáciles de probar unitariamente
+4. **Mantenibilidad**: Separación clara de responsabilidades
+5. **Escalabilidad**: Fácil agregar nuevos permisos sin modificar middleware
+
+```php
+// Con Policies: Granular y específico
+$this->authorize('update', $user);
+
+// Con Middleware: Genérico y limitado
+Route::middleware('admin')->group(function () {
+    // Todas las rutas requieren admin
+});
+```
+
+### Separación de Responsabilidades
+
+La arquitectura sigue principios SOLID:
+
+- **Controllers**: Solo manejo de HTTP (request/response)
+- **Policies**: Lógica de autorización
+- **Resources**: Transformación de datos
+- **Models**: Lógica de negocio y relaciones
+- **Migrations**: Estructura de base de datos
+
+### Manejo de Errores
+
+Respuestas consistentes en formato JSON:
+
+```json
+{
+  "success": false,
+  "message": "Descripción del error",
+  "errors": {
+    "field": ["Mensaje específico"]
+  }
+}
+```
+
+## 📁 Estructura del Proyecto
+
+```
+inventory-api/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/Api/     # Controladores de API
+│   │   └── Resources/           # Transformadores de respuesta
+│   ├── Models/                  # Modelos Eloquent
+│   ├── Policies/               # Políticas de autorización
+│   └── ...
+├── database/
+│   ├── migrations/             # Migraciones de BD
+│   ├── factories/              # Factories para testing
+│   └── seeders/               # Seeders con datos de prueba
+├── routes/
+│   └── api.php                # Rutas de API
+├── postman_collection.json    # Colección de Postman
+└── README.md                  # Este archivo
+```
