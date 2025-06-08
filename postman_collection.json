@@ -1,0 +1,902 @@
+{
+  "info": {
+    "name": "Inventory API",
+    "description": "Colección completa para probar la API de Inventario con autenticación, categorías, productos y usuarios",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "inventory-api-collection",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string",
+      "description": "URL base de la API"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "Token de autenticación (se guarda automáticamente)"
+    },
+    {
+      "key": "current_user_id",
+      "value": "",
+      "type": "string",
+      "description": "ID del usuario autenticado"
+    },
+    {
+      "key": "current_user_role",
+      "value": "",
+      "type": "string",
+      "description": "Rol del usuario (admin/user)"
+    },
+    {
+      "key": "unique_email",
+      "value": "",
+      "type": "string",
+      "description": "Email único para registros"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🔐 Autenticación",
+      "item": [
+        {
+          "name": "Registro de Usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Registro exitoso o email ya existe', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 422]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    try {",
+                  "        const response = pm.response.json();",
+                  "        ",
+                  "        if (response.token) {",
+                  "            pm.collectionVariables.set('token', response.token);",
+                  "            console.log('✅ Usuario registrado y token guardado');",
+                  "            console.log('Token:', response.token.substring(0, 20) + '...');",
+                  "        }",
+                  "        ",
+                  "        if (response.user) {",
+                  "            pm.collectionVariables.set('current_user_id', response.user.id);",
+                  "            pm.collectionVariables.set('current_user_role', response.user.role);",
+                  "            console.log('✅ Usuario creado:', response.user.name);",
+                  "        }",
+                  "    } catch (e) {",
+                  "        console.log('❌ Error al procesar respuesta:', e);",
+                  "    }",
+                  "} else if (pm.response.code === 422) {",
+                  "    try {",
+                  "        const response = pm.response.json();",
+                  "        console.log('⚠️  Error de validación en registro:');",
+                  "        if (response.errors) {",
+                  "            Object.keys(response.errors).forEach(field => {",
+                  "                console.log(`  - ${field}: ${response.errors[field].join(', ')}`);",
+                  "            });",
+                  "        }",
+                  "        console.log('💡 Intenta cambiar el email a uno único');",
+                  "    } catch (e) {",
+                  "        console.log('❌ Error de validación (sin detalles)');",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Registro falló. Código:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generar email único usando timestamp",
+                  "const timestamp = Date.now();",
+                  "const uniqueEmail = `usuario_${timestamp}@example.com`;",
+                  "pm.collectionVariables.set('unique_email', uniqueEmail);",
+                  "console.log('📧 Email único generado:', uniqueEmail);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Juan Pérez\",\n    \"email\": \"{{unique_email}}\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": ["{{base_url}}"],
+              "path": ["register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login exitoso', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    try {",
+                  "        const response = pm.response.json();",
+                  "        ",
+                  "        if (response.token) {",
+                  "            pm.collectionVariables.set('token', response.token);",
+                  "            console.log('✅ Token de Admin guardado exitosamente');",
+                  "            console.log('Token:', response.token.substring(0, 20) + '...');",
+                  "            ",
+                  "            // Guardar información del usuario",
+                  "            if (response.user) {",
+                  "                pm.collectionVariables.set('current_user_id', response.user.id);",
+                  "                pm.collectionVariables.set('current_user_role', response.user.role);",
+                  "                console.log('Usuario:', response.user.name, '- Rol:', response.user.role);",
+                  "            }",
+                  "        } else {",
+                  "            console.log('❌ No se encontró token en la respuesta');",
+                  "        }",
+                  "    } catch (e) {",
+                  "        console.log('❌ Error al procesar respuesta:', e);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Login falló. Código de estado:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Usuario Regular",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login exitoso', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    try {",
+                  "        const response = pm.response.json();",
+                  "        ",
+                  "        if (response.token) {",
+                  "            pm.collectionVariables.set('token', response.token);",
+                  "            console.log('✅ Token de Usuario Regular guardado exitosamente');",
+                  "            console.log('Token:', response.token.substring(0, 20) + '...');",
+                  "            ",
+                  "            // Guardar información del usuario",
+                  "            if (response.user) {",
+                  "                pm.collectionVariables.set('current_user_id', response.user.id);",
+                  "                pm.collectionVariables.set('current_user_role', response.user.role);",
+                  "                console.log('Usuario:', response.user.name, '- Rol:', response.user.role);",
+                  "            }",
+                  "        } else {",
+                  "            console.log('❌ No se encontró token en la respuesta');",
+                  "        }",
+                  "    } catch (e) {",
+                  "        console.log('❌ Error al procesar respuesta:', e);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Login falló. Código de estado:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Logout exitoso', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 || pm.response.code === 204) {",
+                  "    // Limpiar todas las variables de autenticación",
+                  "    pm.collectionVariables.unset('token');",
+                  "    pm.collectionVariables.unset('current_user_id');",
+                  "    pm.collectionVariables.unset('current_user_role');",
+                  "    pm.collectionVariables.unset('unique_email');",
+                  "    ",
+                  "    console.log('✅ Logout exitoso - Variables de autenticación limpiadas');",
+                  "    ",
+                  "    try {",
+                  "        const response = pm.response.json();",
+                  "        if (response.message) {",
+                  "            console.log('📝 Mensaje:', response.message);",
+                  "        }",
+                  "    } catch (e) {",
+                  "        // Respuesta vacía está bien para logout",
+                  "        console.log('✅ Logout completado');",
+                  "    }",
+                  "} else if (pm.response.code === 401) {",
+                  "    console.log('⚠️  Token ya inválido o expirado');",
+                  "    // Limpiar variables de todas formas",
+                  "    pm.collectionVariables.unset('token');",
+                  "    pm.collectionVariables.unset('current_user_id');",
+                  "    pm.collectionVariables.unset('current_user_role');",
+                  "} else {",
+                  "    console.log('❌ Error en logout. Código:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/logout",
+              "host": ["{{base_url}}"],
+              "path": ["logout"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verificar Token Actual",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Verificación de token', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Token válido y activo');",
+                  "    console.log('Usuario autenticado:', response.name || 'N/A');",
+                  "    console.log('Email:', response.email || 'N/A');",
+                  "    console.log('Rol:', response.role || 'N/A');",
+                  "    ",
+                  "    // Actualizar información del usuario",
+                  "    if (response.id) {",
+                  "        pm.collectionVariables.set('current_user_id', response.id);",
+                  "    }",
+                  "    if (response.role) {",
+                  "        pm.collectionVariables.set('current_user_role', response.role);",
+                  "    }",
+                  "} else if (pm.response.code === 401) {",
+                  "    console.log('❌ Token inválido, expirado o no proporcionado');",
+                  "    // Limpiar variables si el token no es válido",
+                  "    pm.collectionVariables.unset('token');",
+                  "    pm.collectionVariables.unset('current_user_id');",
+                  "    pm.collectionVariables.unset('current_user_role');",
+                  "    console.log('🧹 Variables de autenticación limpiadas');",
+                  "} else {",
+                  "    console.log('❓ Estado desconocido. Código:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/user",
+              "host": ["{{base_url}}"],
+              "path": ["user"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📂 Categorías",
+      "item": [
+        {
+          "name": "Listar Categorías",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver Categoría Específica",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/categories/1",
+              "host": ["{{base_url}}"],
+              "path": ["categories", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Categoría (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Hogar\",\n    \"description\": \"Productos para el hogar\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Categoría (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Electrónicos Actualizados\",\n    \"description\": \"Descripción actualizada\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/categories/1",
+              "host": ["{{base_url}}"],
+              "path": ["categories", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar Categoría (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/categories/1",
+              "host": ["{{base_url}}"],
+              "path": ["categories", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📦 Productos",
+      "item": [
+        {
+          "name": "Listar Productos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver Producto Específico",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/1",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Producto (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"category_id\": 1,\n    \"name\": \"iPhone 15\",\n    \"description\": \"Último modelo de iPhone\",\n    \"price\": 999.99,\n    \"stock\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Producto (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Samsung Galaxy S24\",\n    \"price\": 799.99,\n    \"stock\": 15\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/1",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar Producto (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/1",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👥 Usuarios",
+      "item": [
+        {
+          "name": "Listar Usuarios (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver Usuario Específico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Usuario (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"María García\",\n    \"email\": \"maria@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\",\n    \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"María García López\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/2",
+              "host": ["{{base_url}}"],
+              "path": ["users", "2"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar Usuario (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/2",
+              "host": ["{{base_url}}"],
+              "path": ["users", "2"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🧪 Casos de Prueba",
+      "item": [
+        {
+          "name": "Test - Acceso sin autenticación",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test - Usuario regular intenta crear categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Test Categoría\",\n    \"description\": \"Esta debería fallar si no eres admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test - Validación de campos requeridos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"description\": \"Categoría sin nombre para probar validación\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Script que se ejecuta antes de cada request",
+          "console.log('🚀 Ejecutando request:', pm.info.requestName);",
+          "",
+          "// Verificar que tenemos un token si no es un endpoint de auth",
+          "const authEndpoints = ['register', 'login'];",
+          "const isAuthEndpoint = authEndpoints.some(endpoint => ",
+          "    pm.info.requestName.toLowerCase().includes(endpoint.toLowerCase())",
+          ");",
+          "",
+          "if (!isAuthEndpoint) {",
+          "    const token = pm.collectionVariables.get('token');",
+          "    ",
+          "    if (!token) {",
+          "        console.log('⚠️  Advertencia: No hay token de autenticación. Este request podría fallar.');",
+          "        console.log('💡 Ejecuta primero \"Login Admin\" o \"Login Usuario Regular\"');",
+          "    } else {",
+          "        console.log('✅ Token de autenticación encontrado');",
+          "    }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Script que se ejecuta después de cada request",
+          "pm.test('Status code is not 500', function () {",
+          "    pm.expect(pm.response.code).to.not.equal(500);",
+          "});",
+          "",
+          "pm.test('Response time is less than 2000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});",
+          "",
+          "// Mostrar información útil en la consola",
+          "console.log('Response status:', pm.response.code);",
+          "console.log('Response time:', pm.response.responseTime + 'ms');"
+        ]
+      }
+    }
+  ]
+}
