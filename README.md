@@ -20,6 +20,7 @@ Una API RESTful para gestión de inventario construida con Laravel 11, Laravel S
 
 - [Instalación](#-instalación)
 - [URL Pública](#-url-pública)
+- [Arquitectura de Despliegue](#-arquitectura-de-despliegue)
 - [Cuentas de Prueba](#-cuentas-de-prueba)
 - [Documentación](#-documentación)
 - [Endpoints de la API](#-endpoints-de-la-api)
@@ -376,3 +377,26 @@ inventory-api/
 ├── postman_collection.json    # Colección de Postman
 └── README.md                  # Este archivo
 ```
+
+### ☁️ Arquitectura de Despliegue
+
+La aplicación está desplegada en **AWS** utilizando los siguientes servicios:
+
+**🚀 AWS Elastic Beanstalk**
+- Plataforma de despliegue principal
+- Gestión automática de la infraestructura
+- Escalado automático y balanceador de carga
+- Ambiente: PHP 8.3 running on 64bit Amazon Linux 2023
+
+**💻 Amazon EC2**
+- Instancias de cómputo para la aplicación Laravel
+- Tipo de instancia: t3.nano (Free Tier eligible)
+- Auto Scaling configurado según demanda
+
+**🗄️ Amazon RDS**
+- Base de datos PostgreSQL 15.x
+- Clase de instancia: db.t3.nano
+
+**🔧 Configuración adicional:**
+- Variables de entorno gestionadas via Elastic Beanstalk
+- Logs centralizados en CloudWatch
