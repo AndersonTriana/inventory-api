@@ -394,7 +394,7 @@ La aplicación está desplegada en **AWS** utilizando los siguientes servicios:
 - Auto Scaling configurado según demanda
 
 **🗄️ Amazon RDS**
-- Base de datos PostgreSQL 15.x
+- Base de datos PostgreSQL 17.4
 - Clase de instancia: db.t3.nano
 
 **🔧 Configuración adicional:**
