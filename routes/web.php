@@ -3,15 +3,8 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    return response()->json([
+        'message' => 'Bienvenido a la API de inventario',
+        'readme' => 'https://github.com/AndersonTriana/inventory-api'
+    ]);
 });
