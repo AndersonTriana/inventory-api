@@ -1,0 +1,29 @@
+services:
+    inventory-api:
+        build: .
+        image: inventory-api
+        ports:
+            - '8000:80'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - inventory-api
+        depends_on:
+            - db-inventory-api
+    db-inventory-api:
+        image: postgres
+        ports:
+            - '5432:5432'
+        restart: always
+        shm_size: 128mb
+        volumes:
+            - /home/anderson/projects/data/inventory-api:/var/lib/postgresql/data
+        networks:
+            - inventory-api
+        environment:
+            POSTGRES_USER: inventory
+            POSTGRES_PASSWORD: inventory
+
+networks:
+    inventory-api:
+        driver: bridge
