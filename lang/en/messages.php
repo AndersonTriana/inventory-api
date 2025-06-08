@@ -24,4 +24,17 @@ return [
         'product_deleted' => 'Product deleted successfully.',
         'category_deleted' => 'Category deleted successfully.',
     ],
+
+    // Stock status
+    'stock' => [
+        'in_stock' => 'In stock',
+        'low_stock' => 'Low stock',
+        'out_of_stock' => 'Out of stock',
+    ],
+
+    // User roles
+    'roles' => [
+        'admin' => 'Administrator',
+        'user' => 'User',
+    ],
 ];

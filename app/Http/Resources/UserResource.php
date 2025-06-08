@@ -18,9 +18,17 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'role' => $this->role,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'role' => $this->getRoleName(),
+            'created_at' => $this->created_at->format('d/m/Y H:i'),
+            'updated_at' => $this->updated_at->format('d/m/Y H:i'),
         ];
+    }
+
+    /**
+     * Get translated role name
+     */
+    private function getRoleName(): string
+    {
+        return __('messages.roles.' . $this->role);
     }
 }

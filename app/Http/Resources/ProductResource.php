@@ -16,14 +16,28 @@ class ProductResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'category_id' => $this->category_id,
-            'category' => new CategoryResource($this->whenLoaded('category')),
             'name' => $this->name,
             'description' => $this->description,
-            'price' => $this->price,
+            'price' => '$' . number_format($this->price, 2),
             'stock' => $this->stock,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'stock_status' => $this->getStockStatus(),
+            'category' => new CategoryResource($this->whenLoaded('category')),
+            'created_at' => $this->created_at->format('d/m/Y H:i'),
+            'updated_at' => $this->updated_at->format('d/m/Y H:i'),
         ];
+    }
+
+    /**
+     * Get stock status based on quantity
+     */
+    private function getStockStatus(): string
+    {
+        if ($this->stock == 0) {
+            return __('messages.stock.out_of_stock');
+        } elseif ($this->stock <= 5) {
+            return __('messages.stock.low_stock');
+        } else {
+            return __('messages.stock.in_stock');
+        }
     }
 }
